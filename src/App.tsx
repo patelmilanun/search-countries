@@ -3,20 +3,10 @@ import useDebounce from './utils/useDebounce';
 import { Country } from './types/country';
 import { PAGE_SIZE, SEARCH_DELAY_MILLISECONDS } from './const';
 import useKey from './utils/useKey';
-
-const NoContent = ({
-  init,
-  isLoading,
-}: {
-  init: boolean;
-  isLoading: boolean;
-}) => {
-  return (
-    <div className="text-center">
-      {isLoading ? 'Loading...' : init ? 'Not found' : 'Start searching'}
-    </div>
-  );
-};
+import Pagination from './components/Pagination';
+import NoContent from './components/NoContent';
+import { CiSearch } from 'react-icons/ci';
+import { FaSort } from 'react-icons/fa';
 
 function App() {
   const [countries, setCountries] = useState<Country[]>([]);
@@ -75,21 +65,7 @@ function App() {
                   ref={searchRef}
                 />
                 <div className="absolute inset-y-0 start-0 flex items-center pointer-events-none ps-3">
-                  <svg
-                    className="size-4 text-gray-400"
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <path d="m21 21-4.3-4.3"></path>
-                  </svg>
+                  <CiSearch />
                 </div>
               </div>
               {isLoading && (
@@ -152,15 +128,7 @@ function App() {
                             );
                           }}
                         >
-                          <svg
-                            className="w-3 h-3 ms-1.5"
-                            aria-hidden="true"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path d="M8.574 11.024h6.852a2.075 2.075 0 0 0 1.847-1.086 1.9 1.9 0 0 0-.11-1.986L13.736 2.9a2.122 2.122 0 0 0-3.472 0L6.837 7.952a1.9 1.9 0 0 0-.11 1.986 2.074 2.074 0 0 0 1.847 1.086Zm6.852 1.952H8.574a2.072 2.072 0 0 0-1.847 1.087 1.9 1.9 0 0 0 .11 1.985l3.426 5.05a2.123 2.123 0 0 0 3.472 0l3.427-5.05a1.9 1.9 0 0 0 .11-1.985 2.074 2.074 0 0 0-1.846-1.087Z" />
-                          </svg>
+                          <FaSort />
                         </button>
                       </div>
                     </th>
@@ -203,44 +171,13 @@ function App() {
               </table>
             </div>
             {countries.length > 0 && (
-              <div className="py-1 px-4">
-                <nav className="flex justify-end items-center space-x-1">
-                  <button
-                    type="button"
-                    disabled={offset === 0}
-                    className="p-2.5 min-w-[40px] inline-flex justify-center items-center gap-x-2 text-sm rounded-full text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none"
-                    onClick={() => setOffset(offset - PAGE_SIZE)}
-                  >
-                    <span aria-hidden="true">«</span>
-                    <span className="sr-only">Previous</span>
-                  </button>
-                  {[...Array(Math.ceil(countries.length / PAGE_SIZE))].map(
-                    (_, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        className={`min-w-[40px] flex justify-center items-center text-gray-800 hover:bg-gray-100 py-2.5 text-sm rounded-full disabled:opacity-50 disabled:pointer-events-none ${
-                          index === offset / PAGE_SIZE ? 'font-bold' : ''
-                        }`}
-                        aria-current="page"
-                        onClick={() => setOffset(index * PAGE_SIZE)}
-                      >
-                        {index + 1}
-                      </button>
-                    )
-                  )}
-
-                  <button
-                    type="button"
-                    disabled={countries.length <= offset + PAGE_SIZE}
-                    className="p-2.5 min-w-[40px] inline-flex justify-center items-center gap-x-2 text-sm rounded-full text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none"
-                    onClick={() => setOffset(offset + PAGE_SIZE)}
-                  >
-                    <span className="sr-only">Next</span>
-                    <span aria-hidden="true">»</span>
-                  </button>
-                </nav>
-              </div>
+              <Pagination
+                offset={offset}
+                setOffset={setOffset}
+                hasPrev={offset === 0}
+                hasNext={countries.length <= offset + PAGE_SIZE}
+                pages={Math.ceil(countries.length / PAGE_SIZE)}
+              />
             )}
           </div>
         </div>
